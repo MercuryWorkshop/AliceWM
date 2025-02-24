@@ -212,9 +212,36 @@ export default function RepoList() {
 									url = url + "/";
 								}
 
+                                if (!url.startsWith('https://')) {
+                                    console.warn(
+                                        'URL does not start with "https://", this is a user skill issue'
+                                    );
+                                    url = 'https://' + url
+                                }
+
+                                if (url.includes("github.com") || url.includes("raw.githubusercontent.com")) {
+                                    if (!url.startsWith("https://raw.githubusercontent.com/")) {
+                                        console.warn(
+                                            "URL does not follow https://raw.githubusercontent.com/[user]/[repo]/master/ format, this is a user skill issue.",
+                                        );
+                                        url = url.split("https://github.com")[1];
+                                        url = "https://raw.githubusercontent.com" + url + "master/";
+                                    }
+    
+                                    if (!url.endsWith("master/")) {
+                                        console.warn(
+                                            'URL does not end with "master/", this is a user skill issue.',
+                                        );
+                                        url = url + "/master/"
+                                    }
+                                }
+
 								try {
 									let res = await fetch(url + "manifest.json");
 									// if (res.status !== 200); throw "Repo missing manifest.json file, this is a repo maintainer skill issue.";
+                                    if (res.status !== 200) {
+                                        let res = await fetch(url + "list.json")
+                                    }
 									let json = await res.text();
 									json = JSON.parse(json);
 									if (!json.name)
